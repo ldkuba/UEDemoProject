@@ -3,6 +3,12 @@
 
 #include "MobaController.h"
 
+AMobaController::AMobaController()
+    :Super()
+{
+    DefaultCharacter = TSubclassOf<ACharacter>(ACharacter::StaticClass());
+}
+
 void AMobaController::BeginPlay()
 {
     Super::BeginPlay();
@@ -11,6 +17,31 @@ void AMobaController::BeginPlay()
 	FViewport::ViewportResizedEvent.AddUObject(this, &AMobaController::OnViewportResized);
 	// Get current value
 	GetViewportSize(ViewportSize.X, ViewportSize.Y);
+
+    ENetMode mode = GetNetMode();
+    if(mode == ENetMode::NM_ListenServer || mode == ENetMode::NM_DedicatedServer)
+    {
+        if(GEngine)
+            GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Blue, TEXT("Server: Spawning pawn for player"));
+        SpawnPlayerCharacter();
+    }
+}
+
+void AMobaController::SpawnPlayerCharacter()
+{
+    APawn* pawn = GetPawn();
+
+    FActorSpawnParameters params;
+    params.Owner = this;
+
+    ControlledCharacter = GetWorld()->SpawnActor<ACharacter>(
+        DefaultCharacter,
+        pawn ? pawn->GetActorLocation() : FVector::ZeroVector,
+        pawn ? pawn->GetActorRotation() : FRotator::ZeroRotator,
+        params
+    );
+
+    // ControlledCharacter->AddActorWorldOffset(FVector(200.0f, 0.0f, 0.0f));
 }
 
 void AMobaController::OnViewportResized(FViewport* Viewport, uint32)
@@ -55,7 +86,7 @@ void AMobaController::CameraEdgePan(float DeltaTime)
     mousePosX = FMath::Clamp(mousePosX, 0, ViewportSize.X);
     mousePosY = FMath::Clamp(mousePosY, 0, ViewportSize.Y);
 
-    UE_LOG(LogTemp, Log, TEXT("Mouse Position: %f, %f"), mousePosX, mousePosY);
+    // UE_LOG(LogTemp, Log, TEXT("Mouse Position: %f, %f"), mousePosX, mousePosY);
 
     FVector cameraMotion = FVector::ZeroVector;    
     if(mousePosX < EdgePanBorder)
