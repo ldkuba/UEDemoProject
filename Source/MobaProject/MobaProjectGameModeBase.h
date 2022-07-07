@@ -13,5 +13,5 @@ UCLASS()
 class MOBAPROJECT_API AMobaProjectGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 };

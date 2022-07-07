@@ -1,12 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MobaController.h"
+#include "GameFramework/PlayerState.h"
+#include "MobaGameInstance.h"
+#include "MobaPlayerState.h"
 
 AMobaController::AMobaController()
     :Super()
 {
-    DefaultCharacter = TSubclassOf<ACharacter>(ACharacter::StaticClass());
+    DefaultCharacter = TSubclassOf<AMobaUnit>(AMobaUnit::StaticClass());
 }
 
 void AMobaController::BeginPlay()
@@ -22,26 +24,44 @@ void AMobaController::BeginPlay()
     if(mode == ENetMode::NM_ListenServer || mode == ENetMode::NM_DedicatedServer)
     {
         if(GEngine)
-            GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Blue, TEXT("Server: Spawning pawn for player"));
+            GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Blue, TEXT("Server: Spawning player pawn"));
         SpawnPlayerCharacter();
+    }
+
+    // Send player name to server
+    if(IsLocalController())
+    {
+        UMobaGameInstance* gameInstance = Cast<UMobaGameInstance>(GetGameInstance());
+        if(gameInstance)
+        {
+            ServerChangeName(gameInstance->PlayerName);
+        }
+    }
+}
+
+void AMobaController::SetPlayerName(const FString& NewName)
+{
+    if(ControlledCharacter)
+    {
+        ControlledCharacter->SetUnitName(NewName);
     }
 }
 
 void AMobaController::SpawnPlayerCharacter()
 {
+    checkf(!IsNetMode(ENetMode::NM_Client), TEXT("SpawnPlayerCharacter() can only be called on the server"));
+
     APawn* pawn = GetPawn();
 
     FActorSpawnParameters params;
     params.Owner = this;
 
-    ControlledCharacter = GetWorld()->SpawnActor<ACharacter>(
+    ControlledCharacter = GetWorld()->SpawnActor<AMobaUnit>(
         DefaultCharacter,
         pawn ? pawn->GetActorLocation() : FVector(200.0f, 200.0f, 100.0f),
         pawn ? pawn->GetActorRotation() : FRotator::ZeroRotator,
         params
     );
-
-    // ControlledCharacter->AddActorWorldOffset(FVector(200.0f, 0.0f, 0.0f));
 }
 
 void AMobaController::OnViewportResized(FViewport* Viewport, uint32)

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
+#include "MobaUnit.h"
 #include "MobaController.generated.h"
 
 /**
@@ -20,7 +20,7 @@ public:
 
 	virtual void PlayerTick(float DeltaTime) override;
 
-	void SpawnPlayerCharacter();
+	void SetPlayerName(const FString& NewName);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controlls")
 	float EdgePanBorder;
@@ -29,7 +29,7 @@ public:
 	float EdgePanSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
-	TSubclassOf<ACharacter> DefaultCharacter;
+	TSubclassOf<AMobaUnit> DefaultCharacter;
 
 protected:
 	// Called when the game starts or when spawned
@@ -41,5 +41,9 @@ private:
 
 	void CameraEdgePan(float DeltaTime);
 
-	ACharacter* ControlledCharacter;
+	// Server CharacterControllers hold a reference to the controlled character
+	AMobaUnit* ControlledCharacter;
+
+	// Server only method
+	void SpawnPlayerCharacter();
 };
