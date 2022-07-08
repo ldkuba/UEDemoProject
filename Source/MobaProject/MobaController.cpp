@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MobaController.h"
+
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/PlayerState.h"
 #include "MobaGameInstance.h"
 #include "MobaPlayerState.h"
@@ -44,7 +46,49 @@ void AMobaController::PlayerTick(float DeltaTime)
     if(IsLocalPlayerController())
     {
         CameraEdgePan(DeltaTime);
+
+        // Handle player movement
+        if(WasInputKeyJustPressed(EKeys::RightMouseButton))
+        {
+            FVector HitLocation = FVector::ZeroVector;
+            FHitResult Hit;
+            GetHitResultUnderCursor(ECC_Visibility, true, Hit);
+            HitLocation = Hit.Location;
+
+            ServerMoveRequest(HitLocation);
+        }
     }
+}
+
+void AMobaController::ServerMoveRequest_Implementation(FVector Destination)
+{
+    // TODO: make this fetch all currently selected units and issue move command to all
+    AMobaPlayerState* playerState = GetPlayerState<AMobaPlayerState>();
+    if(!playerState)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Player state not found"));
+        return;
+    }
+
+    AMobaUnit* playerUnit = playerState->GetPlayerUnit();
+    if(!playerUnit)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Player unit not found"));
+        return;
+    }
+
+    if(GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Green, FString::Printf(TEXT("Server: %s - move request to: %s"), *(playerUnit->GetUnitName().ToString()), *Destination.ToString()));
+    
+        if(!playerUnit->GetController())
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Red, FString::Printf(TEXT("Server: Controller for %s is null!"), *(playerUnit->GetUnitName().ToString())));
+        }
+    }
+
+    // Direct the Pawn towards that location
+    UAIBlueprintHelperLibrary::SimpleMoveToLocation(playerUnit->GetController(), Destination);
 }
 
 void AMobaController::CameraEdgePan(float DeltaTime)

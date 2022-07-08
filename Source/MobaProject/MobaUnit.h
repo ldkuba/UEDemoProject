@@ -32,6 +32,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetUnitName(const FString& NewName);
+	inline FText GetUnitName() const { return UnitName; }
 
 	UFUNCTION()
 	void OnRep_UnitName();

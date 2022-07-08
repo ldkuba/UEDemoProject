@@ -19,6 +19,7 @@ public:
 	void OnRep_PlayerName() override;
 	
 	void SetPlayerUnit(AMobaUnit* NewUnit);
+	inline AMobaUnit* GetPlayerUnit() const { return ControlledCharacter; }
 
 private:
 	// PlayerState hold a reference to the controlled character

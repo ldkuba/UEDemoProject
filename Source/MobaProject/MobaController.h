@@ -16,7 +16,6 @@ class MOBAPROJECT_API AMobaController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	AMobaController();
 
 	virtual void PlayerTick(float DeltaTime) override;
 
@@ -37,5 +36,8 @@ private:
 	FIntPoint ViewportSize;
 
 	void CameraEdgePan(float DeltaTime);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerMoveRequest(FVector Destination);
 
 };
