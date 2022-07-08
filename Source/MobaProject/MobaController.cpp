@@ -5,12 +5,6 @@
 #include "MobaGameInstance.h"
 #include "MobaPlayerState.h"
 
-AMobaController::AMobaController()
-    :Super()
-{
-    DefaultCharacter = TSubclassOf<AMobaUnit>(AMobaUnit::StaticClass());
-}
-
 void AMobaController::BeginPlay()
 {
     Super::BeginPlay();
@@ -19,14 +13,6 @@ void AMobaController::BeginPlay()
 	FViewport::ViewportResizedEvent.AddUObject(this, &AMobaController::OnViewportResized);
 	// Get current value
 	GetViewportSize(ViewportSize.X, ViewportSize.Y);
-
-    ENetMode mode = GetNetMode();
-    if(mode == ENetMode::NM_ListenServer || mode == ENetMode::NM_DedicatedServer)
-    {
-        if(GEngine)
-            GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Blue, TEXT("Server: Spawning player pawn"));
-        SpawnPlayerCharacter();
-    }
 
     // Send player name to server
     if(IsLocalController())
@@ -37,31 +23,6 @@ void AMobaController::BeginPlay()
             ServerChangeName(gameInstance->PlayerName);
         }
     }
-}
-
-void AMobaController::SetPlayerName(const FString& NewName)
-{
-    if(ControlledCharacter)
-    {
-        ControlledCharacter->SetUnitName(NewName);
-    }
-}
-
-void AMobaController::SpawnPlayerCharacter()
-{
-    checkf(!IsNetMode(ENetMode::NM_Client), TEXT("SpawnPlayerCharacter() can only be called on the server"));
-
-    APawn* pawn = GetPawn();
-
-    FActorSpawnParameters params;
-    params.Owner = this;
-
-    ControlledCharacter = GetWorld()->SpawnActor<AMobaUnit>(
-        DefaultCharacter,
-        pawn ? pawn->GetActorLocation() : FVector(200.0f, 200.0f, 100.0f),
-        pawn ? pawn->GetActorRotation() : FRotator::ZeroRotator,
-        params
-    );
 }
 
 void AMobaController::OnViewportResized(FViewport* Viewport, uint32)

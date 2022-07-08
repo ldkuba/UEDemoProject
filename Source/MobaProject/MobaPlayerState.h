@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "MobaUnit.h"
 #include "MobaPlayerState.generated.h"
 
 /**
@@ -17,4 +18,9 @@ class MOBAPROJECT_API AMobaPlayerState : public APlayerState
 public:
 	void OnRep_PlayerName() override;
 	
+	void SetPlayerUnit(AMobaUnit* NewUnit);
+
+private:
+	// PlayerState hold a reference to the controlled character
+	AMobaUnit* ControlledCharacter;
 };

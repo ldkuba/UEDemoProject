@@ -28,9 +28,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controlls")
 	float EdgePanSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
-	TSubclassOf<AMobaUnit> DefaultCharacter;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,9 +38,4 @@ private:
 
 	void CameraEdgePan(float DeltaTime);
 
-	// Server CharacterControllers hold a reference to the controlled character
-	AMobaUnit* ControlledCharacter;
-
-	// Server only method
-	void SpawnPlayerCharacter();
 };

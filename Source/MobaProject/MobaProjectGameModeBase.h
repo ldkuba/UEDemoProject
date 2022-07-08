@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "MobaUnit.h"
 #include "MobaProjectGameModeBase.generated.h"
 
 /**
@@ -14,4 +15,13 @@ class MOBAPROJECT_API AMobaProjectGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
+
+	AMobaProjectGameModeBase();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
+	TSubclassOf<AMobaUnit> DefaultCharacter;
+
+protected:
+	void OnPostLogin(AController* NewPlayer) override;
 };

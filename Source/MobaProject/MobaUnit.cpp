@@ -24,10 +24,6 @@ void AMobaUnit::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if(GetNetMode() == ENetMode::NM_Client)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Green, FString::Printf(TEXT("%s: Unit spawned on client: %s"), *GetName(), *UnitName.ToString()));
-	}
 }
 
 // Called every frame
@@ -52,11 +48,6 @@ void AMobaUnit::SetUnitName(const FString& NewName)
 
 void AMobaUnit::OnRep_UnitName()
 {
-	if(GetNetMode() == ENetMode::NM_Client)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Green, FString::Printf(TEXT("%s: Unit name replicated on client: %s"), *GetName(), *UnitName.ToString()));
-	}
-
 	// Call blueprint method
 	OnChangeUnitName(UnitName);
 }

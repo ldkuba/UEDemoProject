@@ -8,14 +8,13 @@ void AMobaPlayerState::OnRep_PlayerName()
 {
     Super::OnRep_PlayerName();
 
-    if(GetNetMode() != ENetMode::NM_Client)
+    if(GetNetMode() != ENetMode::NM_Client && ControlledCharacter)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Purple, FString::Printf(TEXT("Player name changed on server: %s"), *GetPlayerName()));
-
-        AMobaController* controller = Cast<AMobaController>(GetOwningController());
-        if(controller)
-        {
-            controller->SetPlayerName(GetPlayerName());
-        }
+        ControlledCharacter->SetUnitName(GetPlayerName());
     }
+}
+
+void AMobaPlayerState::SetPlayerUnit(AMobaUnit* NewUnit)
+{
+    ControlledCharacter = NewUnit;
 }
