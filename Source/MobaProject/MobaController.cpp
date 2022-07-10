@@ -2,7 +2,7 @@
 
 #include "MobaController.h"
 
-#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "AIController.h"
 #include "GameFramework/PlayerState.h"
 #include "MobaGameInstance.h"
 #include "MobaPlayerState.h"
@@ -88,7 +88,11 @@ void AMobaController::ServerMoveRequest_Implementation(FVector Destination)
     }
 
     // Direct the Pawn towards that location
-    UAIBlueprintHelperLibrary::SimpleMoveToLocation(playerUnit->GetController(), Destination);
+    AAIController* aiController = Cast<AAIController>(playerUnit->GetController());
+    if(aiController)
+    {
+        aiController->MoveToLocation(Destination, 1.0f, false, true, true, false);
+    }
 }
 
 void AMobaController::CameraEdgePan(float DeltaTime)
