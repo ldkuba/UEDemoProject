@@ -1,0 +1,29 @@
+{
+	"FileVersion": 3,
+	"Version": 0,
+	"VersionName": "1.2",
+	"FriendlyName": "promethean",
+	"Description": "Promethean AI Plugin. Version: 4eedc1a9f51524b49aa399bb820af453ec0926b9",
+	"Category": "Other",
+	"CreatedBy": "Promethean AI",
+	"CreatedByURL": "https://www.prometheanai.com/",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EngineVersion": "5.0.0",
+	"CanContainContent": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "promethean",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ProceduralMeshComponent",
+			"Enabled": true
+		}
+	]
+}
