@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "MobaAbilitySystemComponent.h"
+#include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "MobaUnitAttributeSet.h"
 #include "MobaUnit.generated.h"

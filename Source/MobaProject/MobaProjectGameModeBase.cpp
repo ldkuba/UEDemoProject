@@ -1,12 +1,31 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MobaProjectGameModeBase.h"
+#include "MobaGameState.h"
 #include "MobaPlayerState.h"
 
 AMobaProjectGameModeBase::AMobaProjectGameModeBase()
     :Super()
 {
+    PrimaryActorTick.bStartWithTickEnabled = true;
+    PrimaryActorTick.bCanEverTick = true;
+
     DefaultCharacter = TSubclassOf<AMobaUnit>(AMobaUnit::StaticClass());
+}
+
+void AMobaProjectGameModeBase::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if(!IsNetMode(ENetMode::NM_Client))
+    {
+        AMobaGameState* gameState = GetGameState<AMobaGameState>();
+        if(gameState)
+        {
+            FScore score = gameState->GetScore();
+            gameState->SetScore({ score.Player1Score + 1, score.Player2Score + 1});
+        }
+    }
 }
 
 void AMobaProjectGameModeBase::OnPostLogin(AController* NewPlayer)

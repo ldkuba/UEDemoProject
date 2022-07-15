@@ -19,6 +19,8 @@ public:
 
 	AMobaProjectGameModeBase();
 
+	void Tick(float DeltaTime) override;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
 	TSubclassOf<AMobaUnit> DefaultCharacter;
 
