@@ -56,42 +56,57 @@ void AMobaController::PlayerTick(float DeltaTime)
             HitLocation = Hit.Location;
 
             ServerMoveRequest(HitLocation);
+        }else if(WasInputKeyJustPressed(EKeys::S))
+        {
+            ServerStopRequest();
         }
     }
+}
+
+AMobaUnit* AMobaController::GetPlayerUnit()
+{
+    AMobaPlayerState* playerState = GetPlayerState<AMobaPlayerState>();
+    if(!playerState)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Player state not found"));
+        return nullptr;
+    }
+
+    return playerState->GetPlayerUnit();
 }
 
 void AMobaController::ServerMoveRequest_Implementation(FVector Destination)
 {
     // TODO: make this fetch all currently selected units and issue move command to all
-    AMobaPlayerState* playerState = GetPlayerState<AMobaPlayerState>();
-    if(!playerState)
-    {
-        UE_LOG(LogTemp, Error, TEXT("Player state not found"));
-        return;
-    }
-
-    AMobaUnit* playerUnit = playerState->GetPlayerUnit();
+    AMobaUnit* playerUnit = GetPlayerUnit();
     if(!playerUnit)
     {
         UE_LOG(LogTemp, Error, TEXT("Player unit not found"));
         return;
     }
 
-    if(GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Green, FString::Printf(TEXT("Server: %s - move request to: %s"), *(playerUnit->GetUnitName().ToString()), *Destination.ToString()));
-    
-        if(!playerUnit->GetController())
-        {
-            GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Red, FString::Printf(TEXT("Server: Controller for %s is null!"), *(playerUnit->GetUnitName().ToString())));
-        }
-    }
-
     // Direct the Pawn towards that location
-    AAIController* aiController = Cast<AAIController>(playerUnit->GetController());
+    AAIController* aiController = playerUnit->GetController<AAIController>();
     if(aiController)
     {
         aiController->MoveToLocation(Destination, 1.0f, false, true, true, false);
+    }
+}
+
+void AMobaController::ServerStopRequest_Implementation()
+{
+    AMobaUnit* playerUnit = GetPlayerUnit();
+    if(!playerUnit)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Player unit not found"));
+        return;
+    }
+
+    // Stop the pawn
+    AAIController* aiController = playerUnit->GetController<AAIController>();
+    if(aiController)
+    {
+        aiController->StopMovement();
     }
 }
 

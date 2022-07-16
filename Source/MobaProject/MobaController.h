@@ -40,4 +40,9 @@ private:
 	UFUNCTION(Server, Unreliable)
 	void ServerMoveRequest(FVector Destination);
 
+	UFUNCTION(Server, Unreliable)
+	void ServerStopRequest();
+
+	AMobaUnit* GetPlayerUnit();
+
 };
