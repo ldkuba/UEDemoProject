@@ -37,6 +37,10 @@ void AMobaUnit::BeginPlay()
 	{
 		AttributeSet = AbilitySystemComponent->GetSet<UMobaUnitAttributeSet>();
 	}
+
+	// This manually calls the callbacks with the initial values
+	OnChangeUnitName(UnitName);
+	OnChangeUnitHealth(AttributeSet->GetHealth());
 }
 
 // Called every frame

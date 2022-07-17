@@ -43,6 +43,7 @@ private:
 	UFUNCTION(Server, Unreliable)
 	void ServerStopRequest();
 
+	UFUNCTION(BlueprintCallable)
 	AMobaUnit* GetPlayerUnit();
 
 };

@@ -2,9 +2,14 @@
 
 
 #include "MobaUnitAttributeSet.h"
+#include "MobaUnit.h"
+#include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 
-UMobaUnitAttributeSet::UMobaUnitAttributeSet(){}
+UMobaUnitAttributeSet::UMobaUnitAttributeSet()
+{
+    MaxHealth = 100.0f;
+}
 
 void UMobaUnitAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -16,4 +21,28 @@ void UMobaUnitAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 void UMobaUnitAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
 {
     GAMEPLAYATTRIBUTE_REPNOTIFY(UMobaUnitAttributeSet, Health, OldValue);
+
+    // Client side notify
+    AMobaUnit* unit = Cast<AMobaUnit>(GetOwningActor());
+    if(IsValid(unit))
+    {
+        unit->OnChangeUnitHealth(Health);
+    }
+}
+
+void UMobaUnitAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData &Data) 
+{
+    Super::PostGameplayEffectExecute(Data);
+
+    if (Data.EvaluatedData.Attribute == GetHealthAttribute()) 
+    {
+        SetHealth(FMath::Clamp(GetHealth(), 0.0f, MaxHealth));
+        
+        // Server side notify
+        AMobaUnit* unit = Cast<AMobaUnit>(GetOwningActor());
+        if(IsValid(unit))
+        {
+            unit->OnChangeUnitHealth(Health);
+        }
+    }
 }

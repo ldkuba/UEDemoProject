@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnChangeUnitName(const FText& NewName);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnChangeUnitHealth(const FGameplayAttributeData& NewHealth);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
