@@ -26,19 +26,24 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// Default abilities
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
+	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
+
 	// Unit name
 	UFUNCTION(BlueprintCallable)
 	void SetUnitName(const FString& NewName);
 	inline FText GetUnitName() const { return UnitName; }
-
 	UFUNCTION()
 	void OnRep_UnitName();
 
+	// Blueprint callbacks
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnChangeUnitName(const FText& NewName);
-
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnChangeUnitHealth(const FGameplayAttributeData& NewHealth);
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnUseAbilityWithTags(const FGameplayTagContainer& AbilityTags);
 
 protected:
 	// Called when the game starts or when spawned

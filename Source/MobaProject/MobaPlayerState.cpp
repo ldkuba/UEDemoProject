@@ -2,7 +2,15 @@
 
 
 #include "MobaPlayerState.h"
+#include "Net/UnrealNetwork.h"
 #include "MobaController.h"
+
+void AMobaPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(AMobaPlayerState, ControlledCharacter);
+}
 
 void AMobaPlayerState::OnRep_PlayerName()
 {

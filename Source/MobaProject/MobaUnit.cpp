@@ -33,9 +33,19 @@ void AMobaUnit::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Get pointer to attribute set
 	if(IsValid(AbilitySystemComponent))
 	{
 		AttributeSet = AbilitySystemComponent->GetSet<UMobaUnitAttributeSet>();
+	}
+
+	// Give all default abilities
+	if(HasAuthority())
+	{
+		for(TSubclassOf<UGameplayAbility>& Ability : DefaultAbilities)
+		{
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability, 1, INDEX_NONE, this));
+		}
 	}
 
 	// This manually calls the callbacks with the initial values

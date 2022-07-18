@@ -16,12 +16,15 @@ class MOBAPROJECT_API AMobaPlayerState : public APlayerState
 	GENERATED_BODY()
 	
 public:
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void OnRep_PlayerName() override;
 	
 	void SetPlayerUnit(AMobaUnit* NewUnit);
 	inline AMobaUnit* GetPlayerUnit() const { return ControlledCharacter; }
 
-private:
+protected:
 	// PlayerState hold a reference to the controlled character
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	AMobaUnit* ControlledCharacter;
 };
