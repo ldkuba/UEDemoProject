@@ -9,6 +9,23 @@
 #include "MobaUnitAttributeSet.h"
 #include "MobaUnit.generated.h"
 
+UENUM()
+enum class EMobaAbilityType : uint8
+{
+	Offensive,
+	Defensive,
+	Special
+};
+
+UENUM()
+enum class EMobaMagicElement : uint8
+{
+	None,
+	Fire,
+	Water,
+	Wind
+};
+
 UCLASS()
 class MOBAPROJECT_API AMobaUnit : public ACharacter, public IAbilitySystemInterface 
 {
@@ -21,14 +38,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// Default abilities
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
 	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
+
+	void UseAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement);
 
 	// Unit name
 	UFUNCTION(BlueprintCallable)

@@ -5,6 +5,11 @@
 #include "Net/UnrealNetwork.h"
 #include "MobaController.h"
 
+AMobaPlayerState::AMobaPlayerState()
+{
+    CurrentMagicElement = EMobaMagicElement::None;
+}
+
 void AMobaPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -20,9 +25,4 @@ void AMobaPlayerState::OnRep_PlayerName()
     {
         ControlledCharacter->SetUnitName(GetPlayerName());
     }
-}
-
-void AMobaPlayerState::SetPlayerUnit(AMobaUnit* NewUnit)
-{
-    ControlledCharacter = NewUnit;
 }

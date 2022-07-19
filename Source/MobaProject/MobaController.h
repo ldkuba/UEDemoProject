@@ -7,6 +7,8 @@
 #include "MobaUnit.h"
 #include "MobaController.generated.h"
 
+DECLARE_DELEGATE_OneParam(FSpellInputDelegate, const EMobaAbilityType);
+
 /**
  * 
  */
@@ -18,6 +20,7 @@ class MOBAPROJECT_API AMobaController : public APlayerController
 public:
 
 	virtual void PlayerTick(float DeltaTime) override;
+	virtual void SetupInputComponent() override;
 
 	void SetPlayerName(const FString& NewName);
 
@@ -30,6 +33,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void UseAbility(EMobaAbilityType AbilityType);
+	UFUNCTION(Server, Reliable)
+	void ServerUseAbility(EMobaAbilityType AbilityType);
 
 private:
 	void OnViewportResized(FViewport* Viewport, uint32);

@@ -63,6 +63,34 @@ void AMobaController::PlayerTick(float DeltaTime)
     }
 }
 
+void AMobaController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    // Setup callback
+    InputComponent->BindAction<FSpellInputDelegate>("Offensive Spell", IE_Pressed, this, &AMobaController::UseAbility, EMobaAbilityType::Offensive);
+    InputComponent->BindAction<FSpellInputDelegate>("Defensive Spell", IE_Pressed, this, &AMobaController::UseAbility, EMobaAbilityType::Defensive);
+    InputComponent->BindAction<FSpellInputDelegate>("Special Spell", IE_Pressed, this, &AMobaController::UseAbility, EMobaAbilityType::Special);
+}
+
+void AMobaController::UseAbility(EMobaAbilityType AbilityType)
+{
+    ServerUseAbility(AbilityType);
+}
+
+void AMobaController::ServerUseAbility_Implementation(EMobaAbilityType AbilityType)
+{
+    AMobaPlayerState* playerState = GetPlayerState<AMobaPlayerState>();
+    if(!playerState)
+        return;
+
+    AMobaUnit* playerUnit = GetPlayerUnit();
+    if(!playerUnit)
+        return;
+
+    playerUnit->UseAbility(AbilityType, playerState->GetMagicElement());
+}
+
 AMobaUnit* AMobaController::GetPlayerUnit()
 {
     AMobaPlayerState* playerState = GetPlayerState<AMobaPlayerState>();

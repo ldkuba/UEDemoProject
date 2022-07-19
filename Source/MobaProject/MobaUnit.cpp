@@ -60,11 +60,49 @@ void AMobaUnit::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
-void AMobaUnit::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AMobaUnit::UseAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	checkf(GetNetMode() != ENetMode::NM_Client, TEXT("UseAbility can only be called on server"));
 
+	if(!IsValid(AbilitySystemComponent))
+		return;
+
+	FGameplayTagContainer AbilityTags;
+
+	switch(AbilityType)
+	{
+		case EMobaAbilityType::Offensive:
+			AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName(TEXT("AbilityType.Offensive"))));
+			break;
+		case EMobaAbilityType::Defensive:
+			AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName(TEXT("AbilityType.Defensive"))));
+			break;
+		case EMobaAbilityType::Special:
+			AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName(TEXT("AbilityType.Special"))));
+			break;
+		default:
+			break;
+	}
+
+	switch(MagicElement)
+	{
+		case EMobaMagicElement::None:
+			AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName(TEXT("MagicElement.None"))));
+			break;
+		case EMobaMagicElement::Fire:
+			AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName(TEXT("MagicElement.Fire"))));
+			break;
+		case EMobaMagicElement::Water:
+			AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName(TEXT("MagicElement.Water"))));
+			break;
+		case EMobaMagicElement::Wind:
+			AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName(TEXT("MagicElement.Wind"))));
+			break;
+		default:
+			break;
+	}
+
+	AbilitySystemComponent->TryActivateAbilitiesByTag(AbilityTags);
 }
 
 void AMobaUnit::SetUnitName(const FString& NewName)
