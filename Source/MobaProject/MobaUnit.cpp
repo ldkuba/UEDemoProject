@@ -3,6 +3,7 @@
 
 #include "MobaUnit.h"
 #include "Net/UnrealNetwork.h"
+#include "MobaController.h"
 
 // Sets default values
 AMobaUnit::AMobaUnit()
@@ -13,7 +14,7 @@ AMobaUnit::AMobaUnit()
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
-	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 }
 
 void AMobaUnit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -21,6 +22,26 @@ void AMobaUnit::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AMobaUnit, UnitName);
+}
+
+APlayerController* AMobaUnit::GetOwningPlayerController() const
+{
+	if(HasAuthority())
+	{
+		return OwningPlayerController;
+	}else
+	{
+		AMobaController* localController = GetWorld()->GetFirstPlayerController<AMobaController>();
+		return (localController->GetPlayerUnit() == this) ? localController : nullptr;
+	}
+}
+
+void AMobaUnit::SetOwningPlayerController(APlayerController* OwnerController)
+{
+	if(HasAuthority())
+	{
+		OwningPlayerController = OwnerController;
+	}
 }
 
 UAbilitySystemComponent* AMobaUnit::GetAbilitySystemComponent() const
@@ -59,6 +80,8 @@ void AMobaUnit::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+// Abilities
 
 void AMobaUnit::UseAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement)
 {
@@ -103,6 +126,11 @@ void AMobaUnit::UseAbility(EMobaAbilityType AbilityType, EMobaMagicElement Magic
 	}
 
 	AbilitySystemComponent->TryActivateAbilitiesByTag(AbilityTags);
+}
+
+void AMobaUnit::ConfirmAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement)
+{
+
 }
 
 void AMobaUnit::SetUnitName(const FString& NewName)

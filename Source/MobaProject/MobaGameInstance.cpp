@@ -2,4 +2,9 @@
 
 
 #include "MobaGameInstance.h"
+#include "AbilitySystemGlobals.h"
 
+void UMobaGameInstance::OnStart()
+{
+    UAbilitySystemGlobals::Get().InitGlobalData();
+}

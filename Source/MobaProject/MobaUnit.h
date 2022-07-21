@@ -26,6 +26,14 @@ enum class EMobaMagicElement : uint8
 	Wind
 };
 
+UENUM()
+enum class EMobaAbilityTargetingType : uint8
+{
+	MouseWorldLocation,
+	MouseDirection,
+	TargetUnit
+};
+
 UCLASS()
 class MOBAPROJECT_API AMobaUnit : public ACharacter, public IAbilitySystemInterface 
 {
@@ -40,11 +48,16 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// Get the PlayerController belonging to the owner player of this unit
+	APlayerController* GetOwningPlayerController() const;
+	void SetOwningPlayerController(APlayerController* OwnerController);
+
 	// Default abilities
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
 	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
 
 	void UseAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement);
+	void ConfirmAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement);
 
 	// Unit name
 	UFUNCTION(BlueprintCallable)
@@ -75,4 +88,7 @@ protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_UnitName, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FText UnitName;
+
+	// Server reference to owning player controller
+	APlayerController* OwningPlayerController;
 };

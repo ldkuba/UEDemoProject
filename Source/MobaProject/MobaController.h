@@ -5,9 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "MobaUnit.h"
+
 #include "MobaController.generated.h"
 
 DECLARE_DELEGATE_OneParam(FSpellInputDelegate, const EMobaAbilityType);
+
+class AMobaUnit;
 
 /**
  * 
@@ -30,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Controlls")
 	float EdgePanSpeed;
 
+	UFUNCTION(BlueprintCallable)
+	AMobaUnit* GetPlayerUnit();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -37,6 +43,10 @@ protected:
 	void UseAbility(EMobaAbilityType AbilityType);
 	UFUNCTION(Server, Reliable)
 	void ServerUseAbility(EMobaAbilityType AbilityType);
+
+	void ConfirmAbility(EMobaAbilityType AbilityType);
+	UFUNCTION(Server, Reliable)
+	void ServerConfirmAbility(EMobaAbilityType AbilityType);
 
 private:
 	void OnViewportResized(FViewport* Viewport, uint32);
@@ -49,8 +59,5 @@ private:
 
 	UFUNCTION(Server, Unreliable)
 	void ServerStopRequest();
-
-	UFUNCTION(BlueprintCallable)
-	AMobaUnit* GetPlayerUnit();
 
 };

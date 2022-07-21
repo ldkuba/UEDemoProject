@@ -56,6 +56,9 @@ void AMobaProjectGameModeBase::OnPostLogin(AController* NewPlayer)
             params
         );
 
+        // On server save reference to player controller
+        playerUnit->SetOwningPlayerController(Cast<APlayerController>(NewPlayer));
+
         // TODO: change to AddPlayerUnit() to handle multiple controllable units
         playerState->SetPlayerUnit(playerUnit);
     }

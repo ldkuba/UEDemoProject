@@ -71,8 +71,13 @@ void AMobaController::SetupInputComponent()
     InputComponent->BindAction<FSpellInputDelegate>("Offensive Spell", IE_Pressed, this, &AMobaController::UseAbility, EMobaAbilityType::Offensive);
     InputComponent->BindAction<FSpellInputDelegate>("Defensive Spell", IE_Pressed, this, &AMobaController::UseAbility, EMobaAbilityType::Defensive);
     InputComponent->BindAction<FSpellInputDelegate>("Special Spell", IE_Pressed, this, &AMobaController::UseAbility, EMobaAbilityType::Special);
+
+    InputComponent->BindAction<FSpellInputDelegate>("Offensive Spell", IE_Released, this, &AMobaController::ConfirmAbility, EMobaAbilityType::Offensive);
+    InputComponent->BindAction<FSpellInputDelegate>("Defensive Spell", IE_Released, this, &AMobaController::ConfirmAbility, EMobaAbilityType::Defensive);
+    InputComponent->BindAction<FSpellInputDelegate>("Special Spell", IE_Released, this, &AMobaController::ConfirmAbility, EMobaAbilityType::Special);
 }
 
+// Ability inputing
 void AMobaController::UseAbility(EMobaAbilityType AbilityType)
 {
     ServerUseAbility(AbilityType);
@@ -90,6 +95,25 @@ void AMobaController::ServerUseAbility_Implementation(EMobaAbilityType AbilityTy
 
     playerUnit->UseAbility(AbilityType, playerState->GetMagicElement());
 }
+
+void AMobaController::ConfirmAbility(EMobaAbilityType AbilityType)
+{
+    ServerConfirmAbility(AbilityType);
+}
+
+void AMobaController::ServerConfirmAbility_Implementation(EMobaAbilityType AbilityType)
+{
+    AMobaPlayerState* playerState = GetPlayerState<AMobaPlayerState>();
+    if(!playerState)
+        return;
+
+    AMobaUnit* playerUnit = GetPlayerUnit();
+    if(!playerUnit)
+        return;
+
+    playerUnit->ConfirmAbility(AbilityType, playerState->GetMagicElement());
+}
+
 
 AMobaUnit* AMobaController::GetPlayerUnit()
 {

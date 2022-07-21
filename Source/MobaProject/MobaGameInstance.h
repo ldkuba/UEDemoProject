@@ -18,4 +18,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString PlayerName;
 	
+protected:
+	virtual void OnStart() override;
 };
