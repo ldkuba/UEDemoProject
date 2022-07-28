@@ -24,6 +24,8 @@ public:
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void StartTargeting(UGameplayAbility* Ability) override;
+	
+	virtual void ConfirmTargetingAndContinue() override;
 
 protected:
 	UPROPERTY(Replicated)
@@ -31,6 +33,11 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerSendTargetingInput(FGameplayAbilityTargetDataHandle Location);
+
+	UFUNCTION(Client, Reliable)
+	void ClientConfirmInput();
+
+	virtual bool ShouldProduceTargetData() const;
 
 	FGameplayAbilityTargetDataHandle CalculateTargetData();
 

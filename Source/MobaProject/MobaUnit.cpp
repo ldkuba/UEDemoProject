@@ -4,6 +4,7 @@
 #include "MobaUnit.h"
 #include "Net/UnrealNetwork.h"
 #include "MobaController.h"
+#include "MobaGameplayAbility.h"
 
 // Sets default values
 AMobaUnit::AMobaUnit()
@@ -90,6 +91,49 @@ void AMobaUnit::UseAbility(EMobaAbilityType AbilityType, EMobaMagicElement Magic
 	if(!IsValid(AbilitySystemComponent))
 		return;
 
+	FGameplayTagContainer AbilityTags = GetAbilityTags(AbilityType, MagicElement);
+	AbilitySystemComponent->TryActivateAbilitiesByTag(AbilityTags);
+}
+
+void AMobaUnit::ConfirmAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement)
+{
+	checkf(GetNetMode() != ENetMode::NM_Client, TEXT("UseAbility can only be called on server"));
+
+	if(!IsValid(AbilitySystemComponent))
+		return;
+
+	FGameplayTagContainer AbilityTags = GetAbilityTags(AbilityType, MagicElement);
+
+	// Find ability with the given tags
+	TArray<FGameplayAbilitySpecHandle> abilityHandles;
+	AbilitySystemComponent->FindAllAbilitiesWithTags(abilityHandles, AbilityTags, true);
+	if(abilityHandles.Num() != 1)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not find ability with tags %s or more than 1 ability found"), *AbilityTags.ToString());
+		return;
+	}
+
+	// Get ability spec and check if it is currently active
+	FGameplayAbilitySpec* abilitySpec = AbilitySystemComponent->FindAbilitySpecFromHandle(abilityHandles[0]);
+	if(!abilitySpec->IsActive())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Ability is not active - cannot confirm"));
+		return;
+	}
+
+	// Confirm the cast for this ability
+	UMobaGameplayAbility* ability = Cast<UMobaGameplayAbility>(abilitySpec->GetPrimaryInstance());
+	if(!IsValid(ability))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not cast ability to UMobaGameplayAbility"));
+		return;
+	}
+
+	ability->ConfirmCast();
+}
+
+FGameplayTagContainer AMobaUnit::GetAbilityTags(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement) const
+{
 	FGameplayTagContainer AbilityTags;
 
 	switch(AbilityType)
@@ -125,12 +169,7 @@ void AMobaUnit::UseAbility(EMobaAbilityType AbilityType, EMobaMagicElement Magic
 			break;
 	}
 
-	AbilitySystemComponent->TryActivateAbilitiesByTag(AbilityTags);
-}
-
-void AMobaUnit::ConfirmAbility(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement)
-{
-
+	return AbilityTags;
 }
 
 void AMobaUnit::SetUnitName(const FString& NewName)

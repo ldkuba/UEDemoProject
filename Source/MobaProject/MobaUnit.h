@@ -80,6 +80,8 @@ protected:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	FGameplayTagContainer GetAbilityTags(EMobaAbilityType AbilityType, EMobaMagicElement MagicElement) const;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent* AbilitySystemComponent;
 

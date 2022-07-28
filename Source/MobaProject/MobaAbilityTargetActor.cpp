@@ -9,10 +9,16 @@
 AMobaAbilityTargetActor::AMobaAbilityTargetActor(const FObjectInitializer& ObjectInitializer)
     :Super(ObjectInitializer)
 {
+    PrimaryActorTick.bCanEverTick = true;
 	ShouldProduceTargetDataOnServer = false;
     bReplicates = true;
 
     OwningPlayerController = nullptr;
+}
+
+bool AMobaAbilityTargetActor::ShouldProduceTargetData() const
+{
+    return true;
 }
 
 void AMobaAbilityTargetActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -25,15 +31,6 @@ void AMobaAbilityTargetActor::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 void AMobaAbilityTargetActor::BeginPlay()
 {
     Super::BeginPlay();
-
-    if(HasAuthority())
-        return;
-
-    if(OwningPlayerController)
-    {
-        // If we are running on remote client do calculations here and send result to server
-        ServerSendTargetingInput(CalculateTargetData());
-    }
 }
 
 void AMobaAbilityTargetActor::StartTargeting(UGameplayAbility* InAbility)
@@ -53,9 +50,40 @@ void AMobaAbilityTargetActor::StartTargeting(UGameplayAbility* InAbility)
     }
 
     SetOwner(OwningPlayerController);
+}
+
+void AMobaAbilityTargetActor::ConfirmTargetingAndContinue()
+{
+    if(GetNetMode() != ENetMode::NM_Client)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ConfirmTargetingAndContinue() called on server"));
+    }else
+    {
+        UE_LOG(LogTemp, Error, TEXT("ConfirmTargetingAndContinue() called on client"));
+    }
 
     // If this is a unit owned by the listening server, do calculations immediatly
     if(OwningPlayerController->IsLocalController())
+    {
+        ServerSendTargetingInput(CalculateTargetData());
+    }else
+    {
+        ClientConfirmInput();
+    }
+}
+
+void AMobaAbilityTargetActor::ClientConfirmInput_Implementation()
+{
+    if(GetNetMode() != ENetMode::NM_Client)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ClientConfirmInput_Implementation() called on server"));
+    }else
+    {
+        UE_LOG(LogTemp, Error, TEXT("ClientConfirmInput_Implementation() called on client"));
+    }
+
+    // Send client targeting data to server
+    if(OwningPlayerController)
     {
         ServerSendTargetingInput(CalculateTargetData());
     }
@@ -84,5 +112,13 @@ FGameplayAbilityTargetDataHandle AMobaAbilityTargetActor::CalculateTargetData()
 
 void AMobaAbilityTargetActor::ServerSendTargetingInput_Implementation(FGameplayAbilityTargetDataHandle Handle)
 {
+    if(GetNetMode() != ENetMode::NM_Client)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ServerSendTargetingInput_Implementation() called on server"));
+    }else
+    {
+        UE_LOG(LogTemp, Error, TEXT("ServerSendTargetingInput_Implementation() called on client"));
+    }
+
     TargetDataReadyDelegate.Broadcast(Handle);
 }
