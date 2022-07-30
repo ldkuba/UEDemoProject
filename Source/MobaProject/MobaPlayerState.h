@@ -29,6 +29,16 @@ public:
 	inline void SetMagicElement(EMobaMagicElement NewElement) { CurrentMagicElement = NewElement; }
 	inline EMobaMagicElement GetMagicElement() const { return CurrentMagicElement; }
 
+	// Shared cooldowns
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float OffensiveSpellCooldown;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float DefensiveSpellCooldown;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float SpecialSpellCooldown;
+
 protected:
 	// PlayerState hold a reference to the controlled character
 	UPROPERTY(Replicated, BlueprintReadOnly)

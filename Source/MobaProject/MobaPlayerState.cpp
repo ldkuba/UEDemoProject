@@ -15,6 +15,7 @@ void AMobaPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AMobaPlayerState, ControlledCharacter);
+    DOREPLIFETIME(AMobaPlayerState, CurrentMagicElement);
 }
 
 void AMobaPlayerState::OnRep_PlayerName()
