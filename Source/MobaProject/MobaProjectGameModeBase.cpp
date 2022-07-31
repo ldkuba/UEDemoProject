@@ -49,10 +49,12 @@ void AMobaProjectGameModeBase::OnPostLogin(AController* NewPlayer)
         FActorSpawnParameters params;
         params.Owner = NewPlayer;
 
+        AActor* playerStart = FindPlayerStart(NewPlayer);
+
         AMobaUnit* playerUnit = GetWorld()->SpawnActor<AMobaUnit>(
             DefaultCharacter,
-            pawn ? pawn->GetActorLocation() : FVector(200.0f, 200.0f, 100.0f),
-            pawn ? pawn->GetActorRotation() : FRotator::ZeroRotator,
+            playerStart ? playerStart->GetActorLocation() : FVector(200.0f, 200.0f, 100.0f),
+            playerStart ? playerStart->GetActorRotation() : FRotator::ZeroRotator,
             params
         );
 
