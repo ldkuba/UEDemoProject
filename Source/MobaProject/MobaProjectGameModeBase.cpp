@@ -3,6 +3,7 @@
 #include "MobaProjectGameModeBase.h"
 #include "MobaGameState.h"
 #include "MobaPlayerState.h"
+#include "MobaController.h"
 
 AMobaProjectGameModeBase::AMobaProjectGameModeBase()
     :Super()
@@ -63,6 +64,11 @@ void AMobaProjectGameModeBase::OnPostLogin(AController* NewPlayer)
 
         // TODO: change to AddPlayerUnit() to handle multiple controllable units
         playerState->SetPlayerUnit(playerUnit);
+        AMobaController* mobaController = Cast<AMobaController>(NewPlayer);
+        if(mobaController)
+        {
+            mobaController->OnPlayerUnitChanged(playerUnit);
+        }
     }
 
     if(GEngine)

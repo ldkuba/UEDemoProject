@@ -35,6 +35,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AMobaUnit* GetPlayerUnit();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPlayerUnitChanged(AMobaUnit* NewUnit);
 
 protected:
 	// Called when the game starts or when spawned
