@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnPlayerUnitChanged(AMobaUnit* NewUnit);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FString PlayerStartTag;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

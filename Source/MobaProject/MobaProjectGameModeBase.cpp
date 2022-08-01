@@ -3,7 +3,6 @@
 #include "MobaProjectGameModeBase.h"
 #include "MobaGameState.h"
 #include "MobaPlayerState.h"
-#include "MobaController.h"
 
 AMobaProjectGameModeBase::AMobaProjectGameModeBase()
     :Super()
@@ -17,40 +16,22 @@ AMobaProjectGameModeBase::AMobaProjectGameModeBase()
 void AMobaProjectGameModeBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
-    if(!IsNetMode(ENetMode::NM_Client))
-    {
-        AMobaGameState* gameState = GetGameState<AMobaGameState>();
-        if(gameState)
-        {
-            FScore score = gameState->GetScore();
-            gameState->SetScore({ score.Player1Score + 1, score.Player2Score + 1});
-        }
-    }
 }
 
-void AMobaProjectGameModeBase::OnPostLogin(AController* NewPlayer)
+void AMobaProjectGameModeBase::SpawnPlayerUnit(AMobaController* PlayerController)
 {
-    Super::OnPostLogin(NewPlayer);
-
-    if(!NewPlayer)
-    {
-        UE_LOG(LogTemp, Error, TEXT("New player controller is null"));
-        return;
-    }
-
-    AMobaPlayerState* playerState = NewPlayer->GetPlayerState<AMobaPlayerState>();
+    AMobaPlayerState* playerState = PlayerController->GetPlayerState<AMobaPlayerState>();
     if(playerState)
     {
         // Can only spawn pawns on server
         checkf(!IsNetMode(ENetMode::NM_Client), TEXT("SpawnPlayerCharacter() can only be called on the server"));
 
-        APawn* pawn = NewPlayer->GetPawn();
-
         FActorSpawnParameters params;
-        params.Owner = NewPlayer;
+        params.Owner = PlayerController;
 
-        AActor* playerStart = FindPlayerStart(NewPlayer);
+        APawn* pawn = PlayerController->GetPawn();
+
+        AActor* playerStart = FindPlayerStart(PlayerController, PlayerController->PlayerStartTag);
 
         AMobaUnit* playerUnit = GetWorld()->SpawnActor<AMobaUnit>(
             DefaultCharacter,
@@ -59,16 +40,33 @@ void AMobaProjectGameModeBase::OnPostLogin(AController* NewPlayer)
             params
         );
 
+        pawn->SetActorLocation(playerStart->GetActorLocation());
+        pawn->SetActorRotation(FRotator::ZeroRotator);
+
         // On server save reference to player controller
-        playerUnit->SetOwningPlayerController(Cast<APlayerController>(NewPlayer));
+        playerUnit->SetOwningPlayerController(Cast<APlayerController>(PlayerController));
+        playerUnit->SetUnitName(playerState->GetPlayerName());
 
         // TODO: change to AddPlayerUnit() to handle multiple controllable units
         playerState->SetPlayerUnit(playerUnit);
-        AMobaController* mobaController = Cast<AMobaController>(NewPlayer);
-        if(mobaController)
-        {
-            mobaController->OnPlayerUnitChanged(playerUnit);
-        }
+        PlayerController->OnPlayerUnitChanged(playerUnit);
+    }
+}
+
+void AMobaProjectGameModeBase::PostLogin(APlayerController* NewPlayer)
+{
+    Super::PostLogin(NewPlayer);
+
+    AMobaController* mobaController = Cast<AMobaController>(NewPlayer);
+    if(mobaController)
+    {
+        mobaController->PlayerStartTag = FString::Printf(TEXT("Player%d"), GetNumPlayers());
+    }
+
+    // Check if game can be started
+    if(GetNumPlayers() >= MAX_PLAYERS)
+    {
+        RestartGame();
     }
 
     if(GEngine)
@@ -79,6 +77,43 @@ void AMobaProjectGameModeBase::OnPostLogin(AController* NewPlayer)
         }else
         {
             GEngine->AddOnScreenDebugMessage(-1, 100.0f, FColor::Blue, FString::Printf(TEXT("Server: OnPostLogin called for: %s"), *NewPlayer->GetName()));
+        }
+    }
+}
+
+void AMobaProjectGameModeBase::RestartGame()
+{
+    checkf(!IsNetMode(ENetMode::NM_Client), TEXT("RestartGame() can only be called on the server"));
+
+    AMobaGameState* gameState = GetGameState<AMobaGameState>();
+    if(gameState)
+    {
+        gameState->SetScore({ 0, 0 });
+    }
+
+    StartNewRound();
+}
+
+void AMobaProjectGameModeBase::StartNewRound()
+{
+    checkf(!IsNetMode(ENetMode::NM_Client), TEXT("StartNewRound() can only be called on the server"));
+
+    for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+    {
+        APlayerController* PlayerController = Iterator->Get();
+        if(!PlayerController)
+            continue;
+
+        AMobaController* mobaController = Cast<AMobaController>(PlayerController);
+        if(mobaController)
+        {
+            AMobaUnit* playerUnit = mobaController->GetPlayerUnit();
+            if(playerUnit)
+            {
+                playerUnit->Destroy();
+            }
+
+            SpawnPlayerUnit(mobaController);
         }
     }
 }

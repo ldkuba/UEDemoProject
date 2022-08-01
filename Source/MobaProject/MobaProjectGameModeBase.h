@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "MobaUnit.h"
+#include "MobaController.h"
 #include "MobaProjectGameModeBase.generated.h"
 
 /**
@@ -14,6 +14,8 @@ UCLASS()
 class MOBAPROJECT_API AMobaProjectGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+	const int32 MAX_PLAYERS = 2;
 
 public:
 
@@ -25,5 +27,11 @@ public:
 	TSubclassOf<AMobaUnit> DefaultCharacter;
 
 protected:
-	void OnPostLogin(AController* NewPlayer) override;
+	void PostLogin(APlayerController* NewPlayer) override;
+
+	void SpawnPlayerUnit(AMobaController* PlayerController);
+
+	void RestartGame();
+	void StartNewRound();
+
 };
