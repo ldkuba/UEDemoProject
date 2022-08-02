@@ -42,7 +42,7 @@ public:
 	int32 PlayerIndex;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void ToggleRoundEndScreen(bool bShow, const FString& WinnerName);
+	void ToggleMessageScreen(bool bShow, const FString& Message);
 
 protected:
 	// Called when the game starts or when spawned

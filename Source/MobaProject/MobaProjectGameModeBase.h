@@ -16,6 +16,7 @@ class MOBAPROJECT_API AMobaProjectGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 	const int32 MAX_PLAYERS = 2;
+	const int32 SCORE_LIMIT = 5;
 
 public:
 
@@ -30,6 +31,7 @@ public:
 
 protected:
 	void PostLogin(APlayerController* NewPlayer) override;
+	void Logout(AController* Exiting) override;
 
 	void SpawnPlayerUnit(AMobaController* PlayerController);
 

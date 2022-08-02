@@ -78,6 +78,14 @@ void AMobaProjectGameModeBase::PostLogin(APlayerController* NewPlayer)
     }
 }
 
+void AMobaProjectGameModeBase::Logout(AController* Exiting)
+{
+    Super::Logout(Exiting);
+
+    // Disconnect all players if someone leaves
+    ReturnToMainMenuHost();
+}
+
 void AMobaProjectGameModeBase::RestartGame()
 {
     checkf(!IsNetMode(ENetMode::NM_Client), TEXT("RestartGame() can only be called on the server"));
@@ -141,16 +149,6 @@ void AMobaProjectGameModeBase::HandleUnitDeath(AMobaUnit* Unit)
         }
     }
 
-    // Display round end message for all players
-    for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
-    {
-        AMobaController* PlayerController = Cast<AMobaController>(Iterator->Get());
-        if(PlayerController)
-        {
-            PlayerController->ToggleRoundEndScreen(true, winnerName);
-        }
-    }
-    
     // Add one point to winner
     AMobaGameState* gameState = GetGameState<AMobaGameState>();
     FScore score = gameState->GetScore();
@@ -160,6 +158,41 @@ void AMobaProjectGameModeBase::HandleUnitDeath(AMobaUnit* Unit)
     }else
     {
         gameState->SetScore({ score.Player1Score, score.Player2Score + 1 });
+    }
+
+    // Check if the score limit has been reached. If so display end message and quit after 5 seconds
+    if(gameState->GetScore().Player1Score >= SCORE_LIMIT || gameState->GetScore().Player2Score >= SCORE_LIMIT)
+    {
+        // Display end game message for all players
+        for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+        {
+            AMobaController* PlayerController = Cast<AMobaController>(Iterator->Get());
+            if(PlayerController)
+            {
+                int32 winnerScore = FGenericPlatformMath::Max(gameState->GetScore().Player1Score, gameState->GetScore().Player2Score);
+                int32 looserScore = FGenericPlatformMath::Min(gameState->GetScore().Player1Score, gameState->GetScore().Player2Score);
+                PlayerController->ToggleMessageScreen(true, FString::Printf(TEXT("%s wins the game - %d:%d"), *winnerName, winnerScore, looserScore));
+            }
+        }
+
+        // Wait for 5 seconds then end the game
+        FTimerHandle timerHandle;
+        GetWorldTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([=]()
+        {
+            ReturnToMainMenuHost();
+        }), 5.0f, false);
+
+        return;
+    }
+
+    // Display round end message for all players
+    for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+    {
+        AMobaController* PlayerController = Cast<AMobaController>(Iterator->Get());
+        if(PlayerController)
+        {
+            PlayerController->ToggleMessageScreen(true, FString::Printf(TEXT("%s wins the round!"), *winnerName));
+        }
     }
 
     // Wait for 5 seconds then hide victory screens and restart round
@@ -172,7 +205,7 @@ void AMobaProjectGameModeBase::HandleUnitDeath(AMobaUnit* Unit)
             AMobaController* PlayerController = Cast<AMobaController>(Iterator->Get());
             if(PlayerController)
             {
-                PlayerController->ToggleRoundEndScreen(false, "");
+                PlayerController->ToggleMessageScreen(false, "");
             }
         }
 
