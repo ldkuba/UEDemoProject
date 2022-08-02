@@ -3,6 +3,7 @@
 
 #include "MobaUnitAttributeSet.h"
 #include "MobaUnit.h"
+#include "MobaProjectGameModeBase.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 
@@ -43,6 +44,13 @@ void UMobaUnitAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffe
         if(IsValid(unit))
         {
             unit->OnChangeUnitHealth(Health);
+        }
+
+        // Handle death
+        if(GetHealth() <= 0)
+        {
+            unit->OnDeath();
+            GetWorld()->GetAuthGameMode<AMobaProjectGameModeBase>()->HandleUnitDeath(unit);
         }
     }
 }

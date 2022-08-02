@@ -48,7 +48,7 @@ public:
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// Get the PlayerController belonging to the owner player of this unit
+	// Get the PlayerController belonging to the owner player of this unit.
 	APlayerController* GetOwningPlayerController() const;
 	void SetOwningPlayerController(APlayerController* OwnerController);
 
@@ -73,6 +73,10 @@ public:
 	void OnChangeUnitHealth(const FGameplayAttributeData& NewHealth);
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnUseAbilityWithTags(const FGameplayTagContainer& AbilityTags);
+
+	// Death
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnDeath();
 
 protected:
 	// Called when the game starts or when spawned

@@ -26,6 +26,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characters")
 	TSubclassOf<AMobaUnit> DefaultCharacter;
 
+	void HandleUnitDeath(AMobaUnit* Unit);
+
 protected:
 	void PostLogin(APlayerController* NewPlayer) override;
 
@@ -33,5 +35,7 @@ protected:
 
 	void RestartGame();
 	void StartNewRound();
+
+	bool bIsRoundInProgress;
 
 };

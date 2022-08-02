@@ -183,3 +183,9 @@ void AMobaUnit::OnRep_UnitName()
 	// Call blueprint method
 	OnChangeUnitName(UnitName);
 }
+
+void AMobaUnit::OnDeath_Implementation()
+{
+	AbilitySystemComponent->CancelAllAbilities();
+	GetController()->StopMovement();
+}

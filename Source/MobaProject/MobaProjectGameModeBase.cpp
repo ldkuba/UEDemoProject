@@ -10,6 +10,8 @@ AMobaProjectGameModeBase::AMobaProjectGameModeBase()
     PrimaryActorTick.bStartWithTickEnabled = true;
     PrimaryActorTick.bCanEverTick = true;
 
+    bIsRoundInProgress = false;
+
     DefaultCharacter = TSubclassOf<AMobaUnit>(AMobaUnit::StaticClass());
 }
 
@@ -28,10 +30,8 @@ void AMobaProjectGameModeBase::SpawnPlayerUnit(AMobaController* PlayerController
 
         FActorSpawnParameters params;
         params.Owner = PlayerController;
-
-        APawn* pawn = PlayerController->GetPawn();
-
-        AActor* playerStart = FindPlayerStart(PlayerController, PlayerController->PlayerStartTag);
+        
+        AActor* playerStart = FindPlayerStart(PlayerController, FString::Printf(TEXT("Player%d"), PlayerController->PlayerIndex));
 
         AMobaUnit* playerUnit = GetWorld()->SpawnActor<AMobaUnit>(
             DefaultCharacter,
@@ -39,9 +39,6 @@ void AMobaProjectGameModeBase::SpawnPlayerUnit(AMobaController* PlayerController
             playerStart ? playerStart->GetActorRotation() : FRotator::ZeroRotator,
             params
         );
-
-        pawn->SetActorLocation(playerStart->GetActorLocation());
-        pawn->SetActorRotation(FRotator::ZeroRotator);
 
         // On server save reference to player controller
         playerUnit->SetOwningPlayerController(Cast<APlayerController>(PlayerController));
@@ -60,7 +57,7 @@ void AMobaProjectGameModeBase::PostLogin(APlayerController* NewPlayer)
     AMobaController* mobaController = Cast<AMobaController>(NewPlayer);
     if(mobaController)
     {
-        mobaController->PlayerStartTag = FString::Printf(TEXT("Player%d"), GetNumPlayers());
+        mobaController->PlayerIndex = GetNumPlayers();
     }
 
     // Check if game can be started
@@ -116,4 +113,70 @@ void AMobaProjectGameModeBase::StartNewRound()
             SpawnPlayerUnit(mobaController);
         }
     }
+
+    bIsRoundInProgress = true;
+}
+
+void AMobaProjectGameModeBase::HandleUnitDeath(AMobaUnit* Unit)
+{
+    if(!bIsRoundInProgress)
+        return;
+
+    bIsRoundInProgress = false;
+
+    int32 looserID = Cast<AMobaController>(Unit->GetOwningPlayerController())->PlayerIndex;
+    FString winnerName = "";
+
+    // Find winners name
+    for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		AMobaController* PlayerController = Cast<AMobaController>(Iterator->Get());
+        if(PlayerController)
+        {
+            if(PlayerController->PlayerIndex != looserID)
+            {
+                winnerName = PlayerController->GetPlayerState<AMobaPlayerState>()->GetPlayerName();
+                break;
+            }
+        }
+    }
+
+    // Display round end message for all players
+    for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+    {
+        AMobaController* PlayerController = Cast<AMobaController>(Iterator->Get());
+        if(PlayerController)
+        {
+            PlayerController->ToggleRoundEndScreen(true, winnerName);
+        }
+    }
+    
+    // Add one point to winner
+    AMobaGameState* gameState = GetGameState<AMobaGameState>();
+    FScore score = gameState->GetScore();
+    if(looserID == 2)
+    {
+        gameState->SetScore({ score.Player1Score + 1, score.Player2Score });
+    }else
+    {
+        gameState->SetScore({ score.Player1Score, score.Player2Score + 1 });
+    }
+
+    // Wait for 5 seconds then hide victory screens and restart round
+    FTimerHandle timerHandle;
+    GetWorldTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([=]()
+    {
+        // Hide round end screen for all players
+        for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+        {
+            AMobaController* PlayerController = Cast<AMobaController>(Iterator->Get());
+            if(PlayerController)
+            {
+                PlayerController->ToggleRoundEndScreen(false, "");
+            }
+        }
+
+        // Restart round
+        StartNewRound();
+    }), 5.0f, false);
 }

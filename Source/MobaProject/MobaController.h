@@ -39,7 +39,10 @@ public:
 	void OnPlayerUnitChanged(AMobaUnit* NewUnit);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FString PlayerStartTag;
+	int32 PlayerIndex;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ToggleRoundEndScreen(bool bShow, const FString& WinnerName);
 
 protected:
 	// Called when the game starts or when spawned
